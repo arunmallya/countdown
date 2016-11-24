@@ -1,0 +1,101 @@
+body{
+  text-align: center;
+  /*background: #00ECB9;*/
+  font-family: sans-serif;
+  font-weight: 100;
+}
+
+h1{
+  color: #396;
+  font-weight: 100;
+  font-size: 40px;
+  margin: 40px 0px 20px;
+}
+
+/*
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+*/
+
+.name{
+  min-width: 100px;
+}
+
+.clock{
+  font-family: sans-serif;
+  color: #fff;
+  display: inline-block;
+  font-weight: 100;
+  text-align: center;
+  font-size: 30px;
+}
+
+.clock > div{
+  padding: 10px;
+  border-radius: 3px;
+  background: #00BF96;
+  display: inline-block;
+}
+
+.clock div > span{
+  min-width: 50px;
+  padding: 15px;
+  border-radius: 3px;
+  background: #00816A;
+  display: inline-block;
+}
+
+.clockclose{
+  font-family: sans-serif;
+  color: #fff;
+  display: inline-block;
+  font-weight: 100;
+  text-align: center;
+  font-size: 30px;
+}
+
+.clockclose > div{
+  padding: 10px;
+  border-radius: 3px;
+  background: #ffb200;
+  display: inline-block;
+}
+
+.clockclose div > span{
+  min-width: 50px;
+  padding: 15px;
+  border-radius: 3px;
+  background: #ff5d00;
+  display: inline-block;
+}
+
+.clockdone{
+  font-family: sans-serif;
+  color: #fff;
+  display: inline-block;
+  font-weight: 100;
+  text-align: center;
+  font-size: 30px;
+}
+
+.clockdone > div{
+  padding: 10px;
+  border-radius: 3px;
+  background: #ff0000;
+  display: inline-block;
+}
+
+.clockdone div > span{
+  min-width: 50px;
+  padding: 15px;
+  border-radius: 3px;
+  background: #ff5d00;
+  display: inline-block;
+}
+
+.smalltext{
+  padding-top: 5px;
+  font-size: 16px;
+}

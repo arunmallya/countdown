@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/i18n/jquery-ui-timepicker-addon-i18n.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.3/jquery-ui-timepicker-addon.js"></script>
+
+  <script>
+    function setCookie(cname,cvalue,exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays*24*60*60*1000));
+      var expires = "expires=" + d.toGMTString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+      console.log(cname + "=" + cvalue + ";" + expires + ";path=/");
+    }
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function getTimeRemaining(endtime) {
+      var t = Date.parse(endtime) - Date.parse(new Date());
+      var seconds = Math.floor((t / 1000) % 60);
+      var minutes = Math.floor((t / 1000 / 60) % 60);
+      var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+      var days = Math.floor(t / (1000 * 60 * 60 * 24));
+      return {
+        'total': t,
+        'days': days,
+        'hours': hours,
+        'minutes': minutes,
+        'seconds': seconds
+      };
+    }
+
+    function initializeClock(id, endtime) {
+      var clock = document.getElementById(id);
+      var daysSpan = clock.querySelector('.days');
+      var hoursSpan = clock.querySelector('.hours');
+      var minutesSpan = clock.querySelector('.minutes');
+      var secondsSpan = clock.querySelector('.seconds');
+
+      function updateClock() {
+        var t = getTimeRemaining(endtime);
+
+        daysSpan.innerHTML = t.days;
+        hoursSpan.innerHTML = ('0' + t.hours).slice(-2);
+        minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
+        secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+
+        if (t.total <= 0) {
+          clearInterval(timeinterval);
+        }
+      }
+
+      updateClock();
+      var timeinterval = setInterval(updateClock, 1000);
+    }
+
+    function addRowToTable() {
+      var name = document.getElementById("name").value;
+      var deadline = document.getElementById("datepicker").value;
+      console.log(name);
+      console.log(deadline);
+
+      if (name != '') {
+        // Get the json of list of events.
+        var list = getCookie("listOfEvents");
+        console.log('list: ' + list);
+        if (list == '') {
+          list = [];
+        } else {
+          list = JSON.parse(list);
+        }
+
+        // Add to list of events.
+        list.push({'name': name, 'deadline': deadline});
+
+        // Sort list.
+        list.sort(function(left, right) {
+          return left['deadline'] > right['deadline'] ? -1 : 1;
+        });
+
+        // Save new list of events.
+        var new_list = JSON.stringify(list);
+        console.log('new_list: ' + new_list);
+        setCookie("listOfEvents", new_list, 30);
+
+        // Redraw the table.
+        makeTable();
+      }
+
+      var frm = document.getElementsByName('entryForm')[0];
+      frm.submit(); // Submit
+      frm.reset();  // Reset
+      return false; // Prevent page refresh
+    }
+
+    function deleteRow(event) {
+      var id = event.target.id;
+      // Get current list, remove element, and save it.
+      var list = getCookie("listOfEvents");
+      list = JSON.parse(list);
+      list.splice(id, 1);
+      // Sort list.
+      list.sort(function(left, right) {
+        return left['deadline'] > right['deadline'] ? -1 : 1;
+      });
+      var new_list = JSON.stringify(list);
+      console.log('new_list: ' + new_list);
+      setCookie("listOfEvents", new_list, 30);
+      document.getElementById('listOfEvents').deleteRow(id);
+      makeTable();
+    }
+
+    function makeTable() {
+      // Clear current table.
+      var table = document.getElementById("listOfEvents");
+      table.innerHTML = "";
+
+      var list = getCookie("listOfEvents");
+      if (list != '') {
+        // Sort list.
+        list = JSON.parse(list);
+        // console.log(list);
+
+        // Insert elements into table.
+        var table = document.getElementById("listOfEvents");
+        for (var i = 0; i < list.length; i++) {
+          var clockid = 'clockdiv-' + i;
+          var t = getTimeRemaining(list[i]['deadline']); 
+          t = t['days'];
+          var classname = 'clock';
+          if (t < 0) {
+            classname = 'clockdone';
+          }
+          if (t > 0 && t < 7) {
+            classname = 'clockclose';
+          }
+          
+
+          var countdown = ' \
+            <div id="' + clockid + '" class="'+ classname +'"> \
+              <div> \
+                <span class="days"></span> \
+                <div class="smalltext">Days</div> \
+              </div> \
+              <div> \
+                <span class="hours"></span> \
+                <div class="smalltext">Hours</div> \
+              </div> \
+              <div> \
+                <span class="minutes"></span> \
+                <div class="smalltext">Minutes</div> \
+              </div> \
+              <div> \
+                <span class="seconds"></span> \
+                <div class="smalltext">Seconds</div> \
+              </div> \
+            </div> \
+          ';
+
+          var row = table.insertRow(0);
+          row.setAttribute('id', 'row-' + i);
+          var nameCell = row.insertCell(0);
+          nameCell.innerHTML = list[i]['name'];
+          nameCell.setAttribute('class', 'name');
+          row.insertCell(1).innerHTML = countdown;
+          row.insertCell(2).innerHTML = '\
+          <input type="button" id=' + i + ' onclick="deleteRow(event)" value="Remove">';
+
+          // Start counter.
+          initializeClock(clockid, list[i]['deadline']); 
+        }
+      }
+    }
+
+    $( function() {
+      $("#datepicker").datetimepicker();
+    } );
+  </script>
+</head>
+
+<body onload='makeTable()'>
+
+  <form name="entryForm">
+    Name: <input type="text" id="name">&nbsp;&nbsp;
+    Deadline: <input type="text" id="datepicker">
+    <input type="button" onclick="addRowToTable()" value="Add">
+  </form>
+
+  </br></br>
+
+  <table id="listOfEvents" style="margin:0 auto;">
+  </table>
+</body>
+</html>
+
