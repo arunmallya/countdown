@@ -99,7 +99,7 @@
         // Save new list of events.
         var new_list = JSON.stringify(list);
         console.log('new_list: ' + new_list);
-        setCookie("listOfEvents", new_list, 30);
+        setCookie("listOfEvents", new_list, 365*10);
 
         // Redraw the table.
         makeTable();
