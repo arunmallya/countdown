@@ -25,6 +25,17 @@
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
           document.getElementById("source").value = data['uri'];
+          console.log('updating url');
+          var root;
+          var loc = window.location.href.indexOf('?');
+          if (loc == -1){
+            root = window.location.href.slice(0, window.location.href.indexOf('?')+1);
+          } else {
+            root = window.location.href.slice(0, window.location.href.indexOf('?'));
+          }
+          // console.log(root);
+          // console.log(root + "?source=" + data['uri']);
+          window.history.replaceState(null, null, root + "?source=" + data['uri']);
         }
       });
       return false;
@@ -55,9 +66,7 @@
       return false;
     }
 
-    function loadFromWeb() {
-      var url = document.getElementById("source").value;
-      console.log(url);
+    function updateCookieFromWeb(url){
       if (url == '') {
         return;
       }
@@ -73,8 +82,15 @@
       });
       if (result != null) {
         setCookie("listOfEvents", result, 365*10);
-        makeTable();
       }
+      document.getElementById("source").value = url;
+    }
+
+    function loadFromWeb() {
+      var url = document.getElementById("source").value;
+      console.log(url);
+      updateCookieFromWeb(url);
+      makeTable(false);
       return false;
     }
 
@@ -130,15 +146,11 @@
 
       function updateClock() {
         var t = getTimeRemaining(endtime);
-        console.log(t);
+        // console.log(t);
         daysSpan.innerHTML = t.days;
         hoursSpan.innerHTML = t.hours;
         minutesSpan.innerHTML = t.minutes;
         secondsSpan.innerHTML = t.seconds;
-
-        // if (t.total <= 0) {
-        //   makeTable();
-        // }
       }
 
       updateClock();
@@ -197,10 +209,21 @@
       console.log('new_list: ' + new_list);
       setCookie("listOfEvents", new_list, 30);
       document.getElementById('listOfEvents').deleteRow(id);
-      makeTable();
+      makeTable(false);
     }
 
-    function makeTable() {
+    function makeTable(firstLoad=true) {
+
+      if (firstLoad){
+        // Get url from link if any.
+        args = getUrlVars();
+        console.log('got source!');
+        console.log(args['source']);
+        if('source' in args) {
+          updateCookieFromWeb(args['source']);
+        }
+      }
+
       // Clear current table.
       var table = document.getElementById("listOfEvents");
       table.innerHTML = "";
@@ -260,6 +283,17 @@
           initializeClock(clockid, list[i]['deadline']); 
         }
       }
+    }
+
+    function getUrlVars(){
+      var vars = [], hash;
+      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+      for(var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+      }
+      return vars;
     }
 
     $( function() {
